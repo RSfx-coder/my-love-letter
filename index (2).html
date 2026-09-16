@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="ti">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>ንዓኺ</title>
+<style>
+:root{
+  --night:#170b18;
+  --night-2:#2b1026;
+  --gold:#e3b25c;
+  --rose:#e2687f;
+  --rose-deep:#a83352;
+  --cream:#f6ecdd;
+  --leaf:#6d9a6a;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{
+  background:radial-gradient(120% 90% at 50% 8%,var(--night-2) 0%,var(--night) 62%,#0c060e 100%);
+  color:var(--cream);
+  font-family:"Noto Serif Ethiopic","Noto Sans Ethiopic","Abyssinica SIL","Ethiopia Jiret",Nyala,serif;
+  display:flex;align-items:center;justify-content:center;
+  overflow:hidden;position:relative;
+}
+.stage{
+  position:absolute;inset:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:26px;padding:24px;
+  opacity:0;visibility:hidden;transition:opacity .7s ease;
+}
+.stage.on{opacity:1;visibility:visible}
+h1{font-size:clamp(20px,5.2vw,28px);font-weight:600;letter-spacing:.2px;line-height:1.5}
+.sub{font-size:clamp(13px,3.6vw,15px);color:#c9b3b9;line-height:1.7;max-width:22em;text-align:center}
+
+/* ---------- PIN ---------- */
+.dots{display:flex;gap:16px;margin:4px 0 2px}
+.dot{width:13px;height:13px;border-radius:50%;border:1.5px solid rgba(227,178,92,.55);transition:.25s}
+.dot.fill{background:var(--gold);border-color:var(--gold);box-shadow:0 0 14px rgba(227,178,92,.6)}
+.pad{display:grid;grid-template-columns:repeat(3,72px);gap:14px}
+.key{
+  height:72px;border-radius:50%;border:1px solid rgba(246,236,221,.16);
+  background:rgba(246,236,221,.05);color:var(--cream);font:inherit;font-size:24px;
+  cursor:pointer;transition:transform .12s,background .2s;
+}
+.key:hover{background:rgba(227,178,92,.14)}
+.key:active{transform:scale(.92)}
+.key.ghost{border-color:transparent;background:none;font-size:19px;color:#c9a0aa}
+.key:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+.err{min-height:1.4em;font-size:14px;color:var(--rose);opacity:0;transition:opacity .3s}
+.err.on{opacity:1}
+.shake{animation:shake .45s}
+@keyframes shake{20%{transform:translateX(-9px)}40%{transform:translateX(9px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
+
+/* ---------- FLOWER ---------- */
+.flower{width:min(72vw,300px);height:min(72vw,300px)}
+.stem{stroke:var(--leaf);stroke-width:4;fill:none;stroke-linecap:round;
+  stroke-dasharray:110;stroke-dashoffset:110}
+.leaf{fill:var(--leaf);opacity:0;transform-origin:100px 150px}
+.petal{transform-origin:100px 96px;transform:scale(.05);opacity:0}
+.core{transform-origin:100px 96px;transform:scale(0)}
+.bloom .stem{animation:draw 1.1s ease forwards}
+.bloom .leaf{animation:leafIn .7s ease .8s forwards}
+.bloom .petal{animation:petalIn .9s cubic-bezier(.2,1.5,.4,1) forwards}
+.bloom .core{animation:coreIn .6s cubic-bezier(.2,1.8,.4,1) 1.9s forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+@keyframes leafIn{from{opacity:0;transform:scale(.4)}to{opacity:1;transform:scale(1)}}
+@keyframes petalIn{to{transform:scale(1);opacity:1}}
+@keyframes coreIn{to{transform:scale(1)}}
+.p1{animation-delay:1.05s}.p2{animation-delay:1.15s}.p3{animation-delay:1.25s}.p4{animation-delay:1.35s}
+.p5{animation-delay:1.45s}.p6{animation-delay:1.55s}.p7{animation-delay:1.65s}.p8{animation-delay:1.75s}
+
+/* ---------- ENVELOPE ---------- */
+.env{position:relative;width:min(80vw,300px);height:min(53vw,200px);cursor:pointer;
+  animation:float 4.5s ease-in-out infinite}
+@keyframes float{50%{transform:translateY(-10px)}}
+.env-body{position:absolute;inset:0;border-radius:6px;
+  background:linear-gradient(160deg,#f3e3cb,#dcc3a4);box-shadow:0 18px 40px rgba(0,0,0,.45)}
+.env-body::before,.env-body::after{content:"";position:absolute;bottom:0;width:52%;height:100%;
+  background:linear-gradient(120deg,#e9d6bb,#cfb290)}
+.env-body::before{left:0;clip-path:polygon(0 0,0 100%,100% 100%)}
+.env-body::after{right:0;clip-path:polygon(100% 0,0 100%,100% 100%)}
+.flap{position:absolute;top:0;left:0;width:100%;height:62%;
+  background:linear-gradient(175deg,#f7ead6,#e2cbac);
+  clip-path:polygon(0 0,100% 0,50% 100%);transform-origin:top;
+  transition:transform .8s cubic-bezier(.6,-.2,.3,1.2);z-index:3}
+.env.open .flap{transform:rotateX(180deg);z-index:0}
+.seal{position:absolute;left:50%;top:48%;width:56px;height:56px;margin:-28px 0 0 -28px;
+  border-radius:50%;background:radial-gradient(circle at 34% 30%,var(--rose),var(--rose-deep));
+  box-shadow:0 5px 14px rgba(0,0,0,.45),inset 0 -3px 6px rgba(0,0,0,.28);
+  display:flex;align-items:center;justify-content:center;font-size:24px;color:#ffd9e2;
+  z-index:4;transition:.5s}
+.env.open .seal{opacity:0;transform:scale(1.9) rotate(22deg)}
+.paper{position:absolute;left:7%;top:8%;width:86%;height:74%;border-radius:4px;
+  background:#fffaf1;z-index:1;transform:translateY(0);transition:transform .7s ease .35s}
+.env.open .paper{transform:translateY(-58%)}
+
+/* ---------- LETTER ---------- */
+#letter{background:rgba(10,5,12,.72);backdrop-filter:blur(3px)}
+.card{
+  width:min(92vw,460px);max-height:82vh;overflow-y:auto;padding:34px 28px 28px;
+  background:linear-gradient(#fffdf6,#fbf1de);color:#3d2a2f;border-radius:4px;
+  box-shadow:0 30px 70px rgba(0,0,0,.6);
+  transform:translateY(26px) scale(.94);opacity:0;transition:.75s cubic-bezier(.2,.9,.3,1)
+}
+#letter.on .card{transform:none;opacity:1}
+.card h2{font-size:21px;font-weight:600;color:var(--rose-deep);margin-bottom:4px}
+.rule{width:54px;height:2px;background:var(--gold);margin:12px 0 20px;border-radius:2px}
+.to{font-size:17px;margin-bottom:14px}
+.body-txt{font-size:16px;line-height:2.05;white-space:pre-line}
+.sign{margin-top:22px;font-size:16px;color:var(--rose-deep)}
+.replay{margin-top:28px;width:100%;padding:13px;border:none;border-radius:3px;
+  background:var(--rose-deep);color:#fff;font:inherit;font-size:15px;cursor:pointer;transition:.25s}
+.replay:hover{background:var(--rose)}
+
+/* ---------- HEARTS ---------- */
+.heart{position:fixed;bottom:-40px;font-size:22px;pointer-events:none;z-index:9;
+  animation:rise linear forwards}
+@keyframes rise{to{transform:translateY(-104vh) rotate(var(--r));opacity:0}}
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
+</style>
+</head>
+<body>
+
+<!-- 1. PIN -->
+<section class="stage on" id="pin">
+  <h1 id="pinTitle"></h1>
+  <p class="sub" id="pinSub"></p>
+  <div class="dots" id="dots"></div>
+  <p class="err" id="err"></p>
+  <div class="pad" id="pad"></div>
+</section>
+
+<!-- 2. FLOWER -->
+<section class="stage" id="bloom">
+  <svg class="flower" id="svg" viewBox="0 0 200 200" aria-hidden="true">
+    <path class="stem" d="M100 192 C100 160 96 130 100 108"/>
+    <ellipse class="leaf" cx="78" cy="150" rx="20" ry="9" transform="rotate(-24 78 150)"/>
+    <ellipse class="leaf" cx="122" cy="166" rx="17" ry="8" transform="rotate(20 122 166)"/>
+    <g id="petals"></g>
+    <circle class="core" cx="100" cy="96" r="15" fill="#e3b25c"/>
+    <circle class="core" cx="100" cy="96" r="7" fill="#c98b32"/>
+  </svg>
+  <p class="sub" id="bloomCap"></p>
+</section>
+
+<!-- 3. ENVELOPE -->
+<section class="stage" id="envStage">
+  <div class="env" id="env" role="button" tabindex="0">
+    <div class="env-body"></div>
+    <div class="paper"></div>
+    <div class="flap"></div>
+    <div class="seal">❤</div>
+  </div>
+  <p class="sub" id="envCap"></p>
+</section>
+
+<!-- 4. LETTER -->
+<section class="stage" id="letter">
+  <div class="card">
+    <h2 id="lTitle"></h2>
+    <div class="rule"></div>
+    <p class="to" id="lTo"></p>
+    <p class="body-txt" id="lBody"></p>
+    <p class="sign" id="lSign"></p>
+    <button class="replay" id="replay"></button>
+  </div>
+</section>
+
+<script>
+/* ===== ኣብዚ ጥራይ ቀይሪ / EDIT HERE ONLY ===== */
+const CONFIG = {
+  RECIPIENT_NAME: "ንፍቕረይ",
+  SECRET_PIN: "1234",
+  PIN_TITLE: "ናይ ፍቕርና ኮድ ኣእትዊ 🔒",
+  PIN_SUBTITLE: "እቲ ዝፈልጦ ሰብ ንስኺ ጥራይ ኢኺ...",
+  WRONG_PIN_MESSAGES: ["ጌጋ! እንደገና ፈትኒ", "ኣይኮነን ማረይ!", "ክትዝክሪዮ ትኽእሊ ኢኺ!"],
+  BLOOM_CAPTION: "ከምዚ ዕምባባ ፍቕርኺ ይዕምብብ ኣሎ...",
+  ENVELOPE_CAPTION: "መልእኽቲ ኣሎኪ! ኣብቲ ማሕተም ጠውቒ",
+  LETTER_TITLE: "ፍሉይ መልእኽቲ",
+  LETTER_TO: "ናብ ፍቕረይ,",
+  LETTER_BODY: "ኣብ ህይወተይ ብምህላውኪ ብጣዕሚ እየ ዘመስግነኪ። ኩሉ ግዜ ኣብ ጎነይ ስለ ዘለኺ የቐንየለይ። ኣነ ኩሉ ግዜ የፍቅረኪ እየ!",
+  LETTER_SIGNOFF: "ካብ ናትኪ...",
+  REPLAY_LABEL: "እንደገና ርኣዮ ↺"
+};
+/* ========================================= */
+
+const $ = id => document.getElementById(id);
+const PIN = String(CONFIG.SECRET_PIN);
+let entry = "", wrongIdx = 0, timers = [];
+
+/* --- fill text --- */
+document.title = CONFIG.RECIPIENT_NAME;
+$("pinTitle").textContent = CONFIG.PIN_TITLE;
+$("pinSub").textContent   = CONFIG.PIN_SUBTITLE;
+$("bloomCap").textContent = CONFIG.BLOOM_CAPTION;
+$("envCap").textContent   = CONFIG.ENVELOPE_CAPTION;
+$("lTitle").textContent   = CONFIG.LETTER_TITLE;
+$("lTo").textContent      = CONFIG.LETTER_TO;
+$("lBody").textContent    = CONFIG.LETTER_BODY;
+$("lSign").textContent    = CONFIG.LETTER_SIGNOFF + " " + CONFIG.RECIPIENT_NAME;
+$("replay").textContent   = CONFIG.REPLAY_LABEL;
+
+/* --- petals (8, around 100,96) --- */
+$("petals").innerHTML = Array.from({length:8},(_,i)=>
+  `<g transform="rotate(${i*45} 100 96)"><ellipse class="petal p${i+1}" cx="100" cy="66" rx="13" ry="29"
+   fill="${i%2?'#e2687f':'#ef8199'}"/></g>`).join("");
+
+/* --- keypad --- */
+const keys = [1,2,3,4,5,6,7,8,9,"",0,"⌫"];
+$("pad").innerHTML = keys.map(k =>
+  k==="" ? `<span></span>` :
+  `<button class="key ${k==="⌫"?"ghost":""}" data-k="${k}">${k}</button>`).join("");
+$("pad").addEventListener("click", e => {
+  const b = e.target.closest(".key"); if(!b) return;
+  press(b.dataset.k);
+});
+document.addEventListener("keydown", e => {
+  if($("pin").classList.contains("on")){
+    if(/^[0-9]$/.test(e.key)) press(e.key);
+    if(e.key==="Backspace") press("⌫");
+  }
+});
+
+function press(k){
+  if(k==="⌫"){ entry = entry.slice(0,-1); return dots(); }
+  if(entry.length >= PIN.length) return;
+  entry += k; dots();
+  if(entry.length === PIN.length){
+    setTimeout(()=> entry === PIN ? unlock() : wrong(), 220);
+  }
+}
+function dots(){
+  $("dots").innerHTML = Array.from({length:PIN.length},(_,i)=>
+    `<span class="dot ${i<entry.length?"fill":""}"></span>`).join("");
+  $("err").classList.remove("on");
+}
+function wrong(){
+  $("err").textContent = CONFIG.WRONG_PIN_MESSAGES[wrongIdx % CONFIG.WRONG_PIN_MESSAGES.length];
+  wrongIdx++;
+  $("err").classList.add("on");
+  $("pin").classList.add("shake");
+  setTimeout(()=>$("pin").classList.remove("shake"),460);
+  entry = "";
+  setTimeout(()=>{ const e=$("err").textContent; dots(); $("err").textContent=e; $("err").classList.add("on"); },380);
+}
+
+/* --- flow --- */
+function show(id){
+  document.querySelectorAll(".stage").forEach(s=>s.classList.toggle("on", s.id===id));
+}
+function later(fn,ms){ timers.push(setTimeout(fn,ms)); }
+
+function unlock(){
+  show("bloom");
+  $("svg").classList.add("bloom");
+  later(()=>{ show("envStage"); }, 3400);
+}
+$("env").addEventListener("click", openEnv);
+$("env").addEventListener("keydown", e=>{ if(e.key==="Enter"||e.key===" "){e.preventDefault();openEnv();} });
+
+function openEnv(){
+  const env = $("env");
+  if(env.classList.contains("open")) return;
+  env.classList.add("open");
+  later(()=>{ show("letter"); hearts(); }, 1150);
+}
+
+function hearts(){
+  const glyphs = ["❤","💖","🌸","💗"];
+  for(let i=0;i<26;i++){
+    const h = document.createElement("span");
+    h.className = "heart";
+    h.textContent = glyphs[i % glyphs.length];
+    h.style.left = Math.random()*96 + "vw";
+    h.style.fontSize = (14 + Math.random()*22) + "px";
+    h.style.animationDuration = (3.4 + Math.random()*2.6) + "s";
+    h.style.animationDelay = (Math.random()*1.2) + "s";
+    h.style.setProperty("--r", (Math.random()*160-80)+"deg");
+    document.body.appendChild(h);
+    setTimeout(()=>h.remove(), 7200);
+  }
+}
+
+$("replay").addEventListener("click", ()=>{
+  timers.forEach(clearTimeout); timers = [];
+  document.querySelectorAll(".heart").forEach(h=>h.remove());
+  $("env").classList.remove("open");
+  $("svg").classList.remove("bloom");
+  entry = ""; dots();
+  show("pin");
+});
+
+dots();
+</script>
+</body>
+</html>
